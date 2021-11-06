@@ -36,7 +36,7 @@ RVTEST_CODE_BEGIN
   bnez t0, 1f
 #endif
   # If U mode is present, UXL should be 2 (XLEN = 64-bit)
-  TEST_CASE(18, a0, SSTATUS_UXL & (SSTATUS_UXL << 1), csrr a0, sstatus; li a1, SSTATUS_UXL; and a0, a0, a1)
+  # TEST_CASE(18, a0, SSTATUS_UXL & (SSTATUS_UXL << 1), csrr a0, sstatus; li a1, SSTATUS_UXL; and a0, a0, a1)
 #ifdef __MACHINE_MODE
   j 2f
 1:
