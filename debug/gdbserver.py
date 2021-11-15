@@ -409,6 +409,21 @@ class MemTestBlock2(MemTestBlock):
     def test(self):
         return self.test_block(2)
 
+class DisconnectTest(GdbTest):
+    def test(self):
+        old_values = self.gdb.info_registers("all", ops=20)
+        self.gdb.disconnect()
+        self.gdb.connect()
+        self.gdb.select_hart(self.hart)
+        new_values = self.gdb.info_registers("all", ops=20)
+
+        regnames = set(old_values.keys()).union(set(new_values.keys()))
+        for regname in regnames:
+            if regname in ("mcycle", "minstret", "instret", "cycle"):
+                continue
+            assertEqual(old_values[regname], new_values[regname],
+                    "Register %s didn't match" % regname)
+
 class InstantHaltTest(GdbTest):
     def test(self):
         """Assert that reset is really resetting what it should."""
@@ -553,7 +568,9 @@ class DebugTurbostep(DebugTest):
         last_pc = None
         advances = 0
         jumps = 0
-        for _ in range(10):
+        start = time.time()
+        count = 10
+        for _ in range(count):
             self.gdb.stepi()
             pc = self.gdb.p("$pc")
             assertNotEqual(last_pc, pc)
@@ -562,6 +579,8 @@ class DebugTurbostep(DebugTest):
             else:
                 jumps += 1
             last_pc = pc
+        end = time.time()
+        print("%.2f seconds/step" % ((end - start) / count))
         # Some basic sanity that we're not running between breakpoints or
         # something.
         assertGreater(jumps, 1)
