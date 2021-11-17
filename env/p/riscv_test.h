@@ -212,13 +212,15 @@ reset_vector:                                                           \
                (1 << CAUSE_BREAKPOINT);                                 \
         csrw medeleg, t0;                                               \
 1:      csrwi mstatus, 0;                                               \
+        li t0, 0x80;                                                    \
+        csrw mstatus, t0;                                               \
         init;                                                           \
         EXTRA_INIT;                                                     \
         EXTRA_INIT_TIMER;                                               \
         la t0, 1f;                                                      \
         csrw mepc, t0;                                                  \
         csrr a0, mhartid;                                               \
-        mret;                                                           \
+        j 1f;                                                           \
 1:
 
 //-----------------------------------------------------------------------
@@ -233,7 +235,6 @@ reset_vector:                                                           \
 //-----------------------------------------------------------------------
 
 #define RVTEST_PASS                                                     \
-        fence;                                                          \
         li TESTNUM, 1;                                                  \
         li a0, 0x5555;                                                  \
         li a1, 0x100000;                                                \
@@ -242,7 +243,6 @@ reset_vector:                                                           \
 
 #define TESTNUM gp
 #define RVTEST_FAIL                                                     \
-        fence;                                                          \
 1:      beqz TESTNUM, 1b;                                               \
         sll TESTNUM, TESTNUM, 1;                                        \
         or TESTNUM, TESTNUM, 1;                                         \
